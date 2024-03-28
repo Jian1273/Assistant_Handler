@@ -5,13 +5,19 @@
 @import url("./font.css");
 
 @layer base {
+  ::-webkit-scrollbar {
+    display: none;
+  }
   :root {
     @apply size-full min-w-[320px];
   }
   body {
     @apply bg-slate-100 relative size-full;
-    font-family: "Poppins", sans-serif;
-    font-weight: 400;
-    font-style: normal;
+  }
+  #app {
+    @apply size-full flex flex-col;
+  }
+  #app > main {
+    @apply flex-1;
   }
 }
