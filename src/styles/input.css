@@ -2,11 +2,16 @@
 @tailwind components;
 @tailwind utilities;
 
+@import url("./font.css");
+
 @layer base {
   :root {
     @apply size-full min-w-[320px];
   }
   body {
     @apply bg-slate-100 relative size-full;
+    font-family: "Poppins", sans-serif;
+    font-weight: 400;
+    font-style: normal;
   }
 }
