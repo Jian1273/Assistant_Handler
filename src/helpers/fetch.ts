@@ -19,14 +19,14 @@ interface IResponseData {
   };
 }
 
-interface ISendParams {
-  days: number | string;
-  folat_share: number | string;
-  start_day: string;
-  end_day: string;
+enum SendParams {
+  days = "days",
+  folat_share = "folat_share",
+  start_day = "start_day",
+  end_day = "end_day",
 }
 
-export function SendData(params: ISendParams) {
+export function SendData(params: Record<SendParams, string>) {
   const paramsStr = new URLSearchParams(params).toString();
   return fetchHelper<IResponseData>("/get_data?" + paramsStr);
 }

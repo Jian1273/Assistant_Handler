@@ -8,8 +8,11 @@
     "compile-css": "npx tailwindcss -i ./src/styles/input.css -o ./src/styles/globals.css --watch"
   },
   "dependencies": {
+    "dayjs": "^1.11.10",
     "preact": "^10.13.1",
-    "preact-iso": "^2.5.0"
+    "preact-iso": "^2.5.0",
+    "react-hook-form": "^7.51.2",
+    "swr": "^2.2.5"
   },
   "devDependencies": {
     "@preact/preset-vite": "^2.5.0",
