@@ -21,7 +21,7 @@ export function Header() {
           <div class="flex items-center">
             <div class="flex-shrink-0">
               <h2 className="text-xl font-bold text-white">
-                Python Tools Online
+                Admin Tools Online
               </h2>
             </div>
             <div class="hidden md:block">
@@ -45,22 +45,3 @@ export function Header() {
     </nav>
   );
 }
-
-// <header className="h-14 bg-blue-600 shadow-lg">
-//   <div className="h-full max-w-screen-lg mx-auto flex flex-row text-white space-x-8 items-center">
-//     <h2 className="text-xl font-bold">Python Tools Online</h2>
-//     <nav className="flex flex-row h-full">
-//       {menus.map((item) => (
-//         <a
-//           href={item.link}
-//           key={item.title}
-//           className={`px-6 flex flex-col justify-center hover:bg-black/20 transition-all ${
-//             url == item.link && "bg-black/20"
-//           }`}
-//         >
-//           {item.title}
-//         </a>
-//       ))}
-//     </nav>
-//   </div>
-// </header>

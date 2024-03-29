@@ -1,6 +1,6 @@
 import { useForm, SubmitHandler } from "react-hook-form";
 import dayjs from "dayjs";
-import { SendData, UpdateData, IResponseData } from "../../helpers/fetch";
+import * as Api from "../../helpers/fetch";
 import { useCallback, useState } from "preact/hooks";
 
 type FormInputs = {
@@ -10,12 +10,11 @@ type FormInputs = {
   end_day: string;
 };
 
-// const sendFetcher = (url: string, params: FormInputs) => {
-//   const paramsStr = new URLSearchParams(params).toString();
-//   return fetch(url + "?" + paramsStr).then((res) => res.json());
-// };
-
 export function Home() {
+  const [loading, setLoading] = useState(false);
+  const [columns, setColumns] = useState<string[]>([]);
+  const [dataList, setDataList] = useState<string[][]>([]);
+  //
   const {
     register,
     handleSubmit,
@@ -26,24 +25,33 @@ export function Home() {
       end_day: dayjs().format("YYYY-MM-DD"),
     },
   });
-  const onSubmit: SubmitHandler<FormInputs> = async (data) => {
-    console.warn(data);
-    setLoading(true);
-    SendData(data)
-      .then((res) => {
-        setColumns(res.resp.columns || []);
-        setDataList(res.resp.values);
-      })
-      .catch((err) => {
-        window.alert("请求失败" + err?.message);
-      })
-      .finally(() => {
-        setLoading(false);
-      });
+
+  const onSubmit: SubmitHandler<FormInputs> = async (params) => {
+    try {
+      params.start_day = dayjs(params.start_day).format("YYYYMMDD");
+      params.end_day = dayjs(params.end_day).format("YYYYMMDD");
+
+      setLoading(true);
+
+      const result = await Api.SendData(params);
+
+      setColumns(result.resp.columns);
+      setDataList(result.resp.values);
+      setLoading(false);
+    } catch (error) {
+      window.alert("send error: " + error?.message);
+      setLoading(false);
+    }
   };
-  const [dataList, setDataList] = useState<string[][]>([]);
-  const [columns, setColumns] = useState<string[]>([]);
-  const [loading, setLoading] = useState(false);
+
+  const onUpdateClick = async () => {
+    try {
+      await Api.UpdateData();
+      alert("update ok");
+    } catch (error) {
+      alert("update error: " + error?.message);
+    }
+  };
 
   const Input = ({ label, register, name, type, errors }) => (
     <div>
@@ -145,15 +153,7 @@ export function Home() {
           <button
             type="button"
             className="flex flex-1 justify-center rounded-lg bg-indigo-600 p-3 font-semibold text-white shadow-sm hover:bg-indigo-500"
-            onClick={() => {
-              UpdateData()
-                .then(() => {
-                  alert("update ok");
-                })
-                .catch((err) => {
-                  alert("update error" + err?.message);
-                });
-            }}
+            onClick={() => onUpdateClick()}
           >
             Update
           </button>
