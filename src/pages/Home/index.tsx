@@ -1,12 +1,19 @@
 import { useForm, SubmitHandler } from "react-hook-form";
 import dayjs from "dayjs";
+import { SendData, UpdateData, IResponseData } from "../../helpers/fetch";
+import { useCallback, useState } from "preact/hooks";
 
 type FormInputs = {
-  days: number;
-  folat_share: number;
+  days: string;
+  folat_share: string;
   start_day: string;
   end_day: string;
 };
+
+// const sendFetcher = (url: string, params: FormInputs) => {
+//   const paramsStr = new URLSearchParams(params).toString();
+//   return fetch(url + "?" + paramsStr).then((res) => res.json());
+// };
 
 export function Home() {
   const {
@@ -19,7 +26,84 @@ export function Home() {
       end_day: dayjs().format("YYYY-MM-DD"),
     },
   });
-  const onSubmit: SubmitHandler<FormInputs> = (data) => console.warn(data);
+  const onSubmit: SubmitHandler<FormInputs> = async (data) => {
+    console.warn(data);
+    setLoading(true);
+    SendData(data)
+      .then((res) => {
+        setColumns(res.resp.columns || []);
+        setDataList(res.resp.values);
+      })
+      .catch((err) => {
+        window.alert("请求失败" + err?.message);
+      })
+      .finally(() => {
+        setLoading(false);
+      });
+  };
+  const [dataList, setDataList] = useState<string[][]>([]);
+  const [columns, setColumns] = useState<string[]>([]);
+  const [loading, setLoading] = useState(false);
+
+  const Input = ({ label, register, name, type, errors }) => (
+    <div>
+      <label className="font-medium text-slate-600">{label}</label>
+      <div className="mt-2">
+        <input
+          type={type}
+          {...register(name, { required: true })}
+          className="block w-full rounded-md border-0 py-3 text-slate-900 shadow-sm ring-1 ring-inset ring-slate-300  transition-all focus:ring-2 focus:ring-indigo-600"
+        />
+      </div>
+      {errors[name] && (
+        <span className="my-1 block text-sm text-red-500">
+          This field is required
+        </span>
+      )}
+    </div>
+  );
+
+  const ResultRender = useCallback(() => {
+    if (loading) {
+      return <span>LOADING...</span>;
+    } else if (columns.length > 0 && dataList.length > 0) {
+      return (
+        <table className="w-full table-auto border-collapse">
+          <thead className="bg-slate-200">
+            <tr>
+              {columns.map((column) => (
+                <th
+                  key={column}
+                  className="border border-slate-300 px-4 py-3 text-left font-bold text-slate-600"
+                >
+                  {column}
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {dataList.map((data, index) => (
+              <tr
+                key={index}
+                className="bg-white even:bg-slate-50 hover:bg-slate-100"
+              >
+                {data.map((val) => (
+                  <td
+                    key={val}
+                    className="border px-4 py-3 text-left text-slate-500"
+                  >
+                    {val}
+                  </td>
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      );
+    } else {
+      return <span>使用左侧表单进行数据查询</span>;
+    }
+  }, [loading, columns, dataList]);
 
   return (
     <div class="container mx-auto flex h-full flex-row space-x-8 overflow-y-scroll py-12">
@@ -28,75 +112,48 @@ export function Home() {
         onSubmit={handleSubmit(onSubmit)}
       >
         <h2 className="text-2xl font-bold text-slate-700">Search Form</h2>
-        {/* input 1 */}
-        <div>
-          <label className="font-medium text-slate-600">Days</label>
-          <div className="mt-2">
-            <input
-              type="number"
-              {...register("days", { required: true })}
-              className="block w-full rounded-md border-0 py-3 text-slate-900 shadow-sm ring-1 ring-inset ring-slate-300  transition-all focus:ring-2 focus:ring-indigo-600"
-            />
-          </div>
-          {errors.days && (
-            <span className="my-1 block text-sm text-red-500">
-              This field is required
-            </span>
-          )}
-        </div>
-        {/* input 2 */}
-        <div>
-          <label className="font-medium text-slate-600">Folat Share</label>
-          <div className="mt-2">
-            <input
-              type="number"
-              {...register("folat_share", { required: true })}
-              className="block w-full rounded-md border-0 py-3 text-slate-900 shadow-sm ring-1 ring-inset ring-slate-300  transition-all focus:ring-2 focus:ring-indigo-600"
-            />
-          </div>
-          {errors.folat_share && (
-            <span className="my-1 block text-sm text-red-500">
-              This field is required
-            </span>
-          )}
-        </div>
-        {/* input 3 */}
-        <div>
-          <label className="font-medium text-slate-600">StartDay</label>
-          <div className="mt-2">
-            <input
-              type="date"
-              {...register("start_day", { required: true })}
-              className="block w-full rounded-md border-0 py-3 text-slate-900 shadow-sm ring-1 ring-inset ring-slate-300  transition-all focus:ring-2 focus:ring-indigo-600"
-            />
-          </div>
-          {errors.start_day && (
-            <span className="my-1 block text-sm text-red-500">
-              This field is required
-            </span>
-          )}
-        </div>
-        {/* input 4 */}
-        <div>
-          <label className="font-medium text-slate-600">EndDay</label>
-          <div className="mt-2">
-            <input
-              type="date"
-              {...register("end_day", { required: true })}
-              className="block w-full rounded-md border-0 py-3 text-slate-900 shadow-sm ring-1 ring-inset ring-slate-300  transition-all focus:ring-2 focus:ring-indigo-600"
-            />
-          </div>
-          {errors.end_day && (
-            <span className="my-1 block text-sm text-red-500">
-              This field is required
-            </span>
-          )}
-        </div>
+        <Input
+          label="Days"
+          register={register}
+          name="days"
+          type="number"
+          errors={errors}
+        />
+        <Input
+          label="Folat Share"
+          register={register}
+          name="folat_share"
+          type="number"
+          errors={errors}
+        />
+        <Input
+          label="StartDay"
+          register={register}
+          name="start_day"
+          type="date"
+          errors={errors}
+        />
+        <Input
+          label="EndDay"
+          register={register}
+          name="end_day"
+          type="date"
+          errors={errors}
+        />
 
         <div className="flex flex-row space-x-4 pt-4">
           <button
             type="button"
             className="flex flex-1 justify-center rounded-lg bg-indigo-600 p-3 font-semibold text-white shadow-sm hover:bg-indigo-500"
+            onClick={() => {
+              UpdateData()
+                .then(() => {
+                  alert("update ok");
+                })
+                .catch((err) => {
+                  alert("update error" + err?.message);
+                });
+            }}
           >
             Update
           </button>
@@ -113,37 +170,7 @@ export function Home() {
         <h2 className="mb-6 text-2xl font-bold text-slate-700">
           Search Result
         </h2>
-        <table className="w-full table-auto border-collapse">
-          <thead className="bg-slate-200">
-            <tr>
-              {[1, 2, 3, 4, 5].map((item) => (
-                <th
-                  key={item}
-                  className="border border-slate-300 px-4 py-3 text-left font-bold text-slate-600"
-                >
-                  Col {item}
-                </th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {[1, 2, 3, 4, 5, 6].map((item) => (
-              <tr
-                key={item}
-                className="bg-white even:bg-slate-50 hover:bg-slate-100"
-              >
-                {[1, 2, 3, 4, 5].map((val) => (
-                  <td
-                    key={val}
-                    className="border px-4 py-3 text-left text-slate-500"
-                  >
-                    Value {val}
-                  </td>
-                ))}
-              </tr>
-            ))}
-          </tbody>
-        </table>
+        <ResultRender />
       </div>
     </div>
   );

@@ -1,4 +1,5 @@
 const baseURL = "http://127.0.0.1:5000";
+// const baseURL = "http://localhost:8989/assistant";
 
 export function fetchHelper<T>(url: string, init?: RequestInit): Promise<T> {
   return new Promise(async (resolve, reject) => {
@@ -12,7 +13,7 @@ export function fetchHelper<T>(url: string, init?: RequestInit): Promise<T> {
   });
 }
 
-interface IResponseData {
+export interface IResponseData {
   resp: {
     columns: string[];
     values: string[][];
